@@ -6,6 +6,7 @@ from tkinter import messagebox, filedialog
 symbols = ['!', '@', "#", '$', '%', '&']
 numbers = [str(i) for i in range(10)]
 alphabet = [chr(i) for i in range(ord('a'), ord('z') + 1)]
+options = [symbols, numbers, alphabet]
 
 folder_path = None  # Global variable to store file path
 
@@ -26,6 +27,12 @@ def generate_passwords():
         # Get the number of passwords from the user
         number_of_passwords = int(entry_number.get())
         password_names = entry_purposes.get().split(" ")  # space-separated purposes
+        length_of_password = int(entry_length.get())
+
+        # Ensure the password length is at least 5
+        if length_of_password < 5:
+            messagebox.showerror("Error", "Password length must be at least 5 characters.")
+            return
         
         if len(password_names) != number_of_passwords:
             raise ValueError("Number of purposes must match the number of passwords.")
@@ -33,22 +40,15 @@ def generate_passwords():
         passwords = []
         for _ in range(number_of_passwords):
             password = []
-            symNum = random.randint(1, 5)
-            numNums = random.randint(1, len(numbers) - 1)
-            lowerNum = random.randint(1, 10)
-            upperNum = random.randint(1, 10)
-            
-            for _ in range(symNum):
-                password.extend(random.choice(symbols))
-            
-            for _ in range(numNums):
-                password.extend(random.choice(numbers))
-            
-            for _ in range(lowerNum):
-                password.extend(random.choice(alphabet))
-            
-            for _ in range(upperNum):
-                password.extend(random.choice(alphabet).upper())
+            for _ in range(length_of_password):
+                current = random.choice(options)
+                if current == alphabet:
+                    if random.randint(0, 1) == 0:
+                        password.extend(random.choice(current).upper())
+                    else:
+                        password.extend(random.choice(current))
+                else:
+                    password.extend(random.choice(current))
             
             random.shuffle(password)
             passwords.append(''.join(password))
@@ -74,6 +74,7 @@ def clear_inputs():
     """Clear all input fields."""
     entry_number.delete(0, tk.END)  # Clear the number input
     entry_purposes.delete(0, tk.END)  # Clear the purposes input
+    entry_length.delete(0, tk.END)  # clear the length input
     text_display.delete('1.0', tk.END)  # Clear the password display
 
 # Create the GUI
@@ -92,6 +93,12 @@ label_purposes = tk.Label(root, text="Enter purposes (space separated):")
 label_purposes.pack()
 entry_purposes = tk.Entry(root)
 entry_purposes.pack()
+
+# Create input for number of passwords
+label_length = tk.Label(root, text="Length of password?")
+label_length.pack()
+entry_length = tk.Entry(root)
+entry_length.pack()
 
 # Create a button to generate passwords
 button_generate = tk.Button(root, text="Generate Passwords", command=generate_passwords)
